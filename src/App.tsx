@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { PageViews } from '@piwikpro/react-piwik-pro';
-import { CustomEvent } from '@piwikpro/react-piwik-pro'
+// import { CustomEvent } from '@piwikpro/react-piwik-pro'
 import { Header } from './components/Header';
 import { Content } from './components/Content';
 import { products } from './data/products.ts';
