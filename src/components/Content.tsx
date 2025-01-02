@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { IProduct } from './../types.ts';
+import { IProduct } from '../types.ts';
 
 interface IContent {
   products: Array<IProduct>;
@@ -22,7 +22,10 @@ export const Content: React.FC<IContent> = ({ products, handleProductSelection }
         { products.map((product) => (
           <tr key={product.id}>
             <td>
-              <input type="checkbox" onChange={(event) => handleProductSelection(product, event.target.value === "on")}></input>
+              <input type="checkbox" onChange={(event) => {
+                handleProductSelection(product, event.target.value === "on")
+              }
+            }></input>
             </td>
             <td>{product.id}</td>
             <td>{product.name}</td>
