@@ -5,6 +5,7 @@ import { ElectronicsIcon } from "../../assets/ElectronicsIcon.tsx";
 import { HouseholdIcon } from "../../assets/HouseholdIcon.tsx";
 import { FurnitureIcon } from "../../assets/FurnitureIcon.tsx";
 import { ShoppingCartIcon } from "../../assets/ShoppingCartIcon.tsx";
+import { CustomEvent } from "@piwikpro/react-piwik-pro";
 
 interface IProductCard {
   product: IProduct;
@@ -95,8 +96,10 @@ export const ProductCard: React.FC<IProductCard> = ({ product, idsOfProductsInCa
 
         <StyledCartButton onClick={() => {
           if (isSelected) {
+            CustomEvent.trackEvent(`category-${product.type}`, 'select', 'Select product');
             setIdsOfProductsInCart((prev) => prev.filter(id => id !== product.id));
           } else {
+            CustomEvent.trackEvent(`category-${product.type}`, 'unselect', 'Unselect product');
             setIdsOfProductsInCart((prev) => [...prev, product.id]);
           }
         }}>
