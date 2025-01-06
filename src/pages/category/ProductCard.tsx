@@ -6,6 +6,9 @@ import { HouseholdIcon } from "../../assets/HouseholdIcon.tsx";
 import { FurnitureIcon } from "../../assets/FurnitureIcon.tsx";
 import { ShoppingCartIcon } from "../../assets/ShoppingCartIcon.tsx";
 import { CustomEvent } from "@piwikpro/react-piwik-pro";
+import { createPortal } from "react-dom";
+import { AppModal } from "../../components/AppModal.tsx";
+import { useState } from "react";
 
 interface IProductCard {
   product: IProduct;
@@ -14,6 +17,8 @@ interface IProductCard {
 }
 
 export const ProductCard: React.FC<IProductCard> = ({ product, idsOfProductsInCart, setIdsOfProductsInCart }) => {
+  const [showProductPreview, setShowProductPreview] = useState<boolean>(false);
+
   const isSelected = idsOfProductsInCart.some((id) => id === product.id);
 
   const StyledCard = styled('div')<{ isSelected: boolean }>(({ isSelected }) => ({
@@ -27,6 +32,12 @@ export const ProductCard: React.FC<IProductCard> = ({ product, idsOfProductsInCa
     backgroundColor: '#e1c744',
     borderRadius: '0.5em',
     opacity: isSelected ? '0.4' : '1', 
+    cursor: 'pointer',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+
+    '&:hover': {
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+    },
   }));
 
   const StyledCardHeader = styled('div')(() => ({
@@ -39,12 +50,12 @@ export const ProductCard: React.FC<IProductCard> = ({ product, idsOfProductsInCa
     borderRadius: '0.5em 0.5em 0 0',
   }));
 
-  const StyledNameLabel = styled('label')(() => ({
+  const StyledNameLabel = styled('span')(() => ({
     paddingLeft: '16px',
     fontSize: '1.25em',
   }));
 
-  const StyledPriceLabel = styled('label')(() => ({
+  const StyledPriceLabel = styled('span')(() => ({
     paddingLeft: '16px',
     fontSize: '1.5em',
   }));
@@ -83,9 +94,23 @@ export const ProductCard: React.FC<IProductCard> = ({ product, idsOfProductsInCa
 
   const formattedPrice = product.price.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
+  console.debug('showProductPreview', showProductPreview);
+
+  const handleAddToCart = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+
+    if (isSelected) {
+      CustomEvent.trackEvent(`category-${product.type}`, 'select', 'Select product');
+      setIdsOfProductsInCart((prev) => prev.filter(id => id !== product.id));
+    } else {
+      CustomEvent.trackEvent(`category-${product.type}`, 'unselect', 'Unselect product');
+      setIdsOfProductsInCart((prev) => [...prev, product.id]);
+    }
+  };
+
   return (
     <Grid2 size={4}>
-      <StyledCard isSelected={isSelected}>
+      <StyledCard isSelected={isSelected} onClick={() => setShowProductPreview(true)}>
         <StyledCardHeader>
           { getIcon() }          
         </StyledCardHeader>
@@ -94,17 +119,18 @@ export const ProductCard: React.FC<IProductCard> = ({ product, idsOfProductsInCa
         
         <StyledPriceLabel>{ `${formattedPrice} zł` }</StyledPriceLabel>
 
-        <StyledCartButton onClick={() => {
-          if (isSelected) {
-            CustomEvent.trackEvent(`category-${product.type}`, 'select', 'Select product');
-            setIdsOfProductsInCart((prev) => prev.filter(id => id !== product.id));
-          } else {
-            CustomEvent.trackEvent(`category-${product.type}`, 'unselect', 'Unselect product');
-            setIdsOfProductsInCart((prev) => [...prev, product.id]);
-          }
-        }}>
+        <StyledCartButton onClick={handleAddToCart}>
           <ShoppingCartIcon height="1.5em" width="1.5em"/>
         </StyledCartButton>
+
+        { createPortal(
+          <AppModal
+            isOpen={showProductPreview}
+            setIsOpen={setShowProductPreview}
+            title={`Product preview: ${product.name}`}
+            content={"test desc"}
+          />
+        , document.body) }
       </StyledCard>
     </Grid2>
   );
